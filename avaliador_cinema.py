@@ -1,16 +1,15 @@
+from colorama import Fore, Back, Style
 import getpass
 import os
 import random
 import re
 import string
 
-# Verifica se as pastas "users" e "movies" existem, se não, as cria
 if not os.path.exists("users"):
     os.makedirs("users")
 if not os.path.exists("movies"):
     os.makedirs("movies")
 
-# CLASSE USUÁRIO:
 class User:
     def __init__(self, user_name, user_login, user_email, user_password):
         self.user_name = user_name
@@ -25,19 +24,17 @@ class User:
             f"Email:    {self.user_email}\n"
         )
 
-    # Salva os dados do usuário em um arquivo
-    def save_to_file(self):
+    def save_info(self):
         with open(f"users/{self.user_login}.txt", "w") as user_file:
-            user_file.write(f"{self.user_name}\n")
-            user_file.write(f"{self.user_login}\n")
-            user_file.write(f"{self.user_email}\n")
-            user_file.write(f"{self.user_password}\n")
-    
-    # Carrega o usuário a partir de um arquivo
+            user_file.write(f"Nome:     {self.user_name}\n")
+            user_file.write(f"Login:    {self.user_login}\n")
+            user_file.write(f"Email:    {self.user_email}\n")
+            user_file.write(f"Senha:    {self.user_password}\n")
+
     @classmethod
-    def load_from_file(cls, user_login):
+    def load_info(cls):
         try:
-            with open(f"users/{user_login}.txt", "r") as user_file:
+            with open(f"users/{cls.user_login}.txt", "r") as user_file:
                 lines = user_file.readlines()
                 if len(lines) == 4:
                     user_name = lines[0].strip()
@@ -51,7 +48,6 @@ class User:
 
     @classmethod
     def get_user(cls) -> "User":
-        # Método para pegar dados do usuário e validá-los
         while True:
             user_name = input("Digite seu nome completo (todos os nomes precisam começar com letra maiúscula): ")
             if cls(user_name, "", "", "").validate_user_name():
@@ -62,7 +58,9 @@ class User:
 
         while True:
             user_login = input("Digite seu login (deve ter entre 3 e 16 caracteres, sem espaços e sem letras maiúsculas): @")
-            if cls("", user_login, "", "").validate_user_login():
+            if os.path.exists(f"users/{user_login}.txt"):
+                print("Erro: Login já existe.")
+            elif cls("", user_login, "", "").validate_user_login():
                 print("Login Válido")
                 break
             else:
@@ -118,7 +116,6 @@ class User:
         return False
 
 
-# CLASSE FILME:
 class Movie:
     def __init__(self, movie_id, movie_name, movie_director, movie_tags, movie_rating, movie_comments):
         self.movie_id = movie_id
@@ -130,20 +127,20 @@ class Movie:
 
     def __str__(self) -> str:
         return (
-            f"Nome do Filme:        {self.movie_name} ({self.movie_rating:.2f}) - #{self.movie_id}\n"
+            f"Nome do Filme:        {self.movie_name} ({self.movie_rating:.1f}) - #{self.movie_id}\n"
             f"Diretor do Filme:     {self.movie_director}\n"
             f"Categorias:           {self.movie_tags}\n"
             f"Comentários:          {self.movie_comments}\n"
         )
 
-    # Salva o filme em um arquivo
-    def save_to_file(self):
+    def save_info(self):
         with open(f"movies/{self.movie_id}.txt", "w") as movie_file:
-            movie_file.write(f"{self.movie_name}\n")
-            movie_file.write(f"{self.movie_director}\n")
-            movie_file.write(f"{', '.join(self.movie_tags)}\n")
-            movie_file.write(f"{self.movie_rating}\n")
-            movie_file.write(f"{self.movie_comments}\n")
+            movie_file.write(f"{Back.RED}{Fore.WHITE}{Style.DIM}Nome do Filme:{Style.RESET_ALL}       {self.movie_name}\n")
+            movie_file.write(f"{Back.RED}{Fore.WHITE}{Style.DIM}Diretor do Filme:{Style.RESET_ALL}    {self.movie_director}\n")
+            movie_file.write(f"{Back.RED}{Fore.WHITE}{Style.DIM}Categorias:{Style.RESET_ALL}          {', '.join(self.movie_tags)}\n")
+            movie_file.write(f"{Back.RED}{Fore.WHITE}{Style.DIM}Nota:{Style.RESET_ALL}                {self.movie_rating}\n")
+            movie_file.write(f"{Back.RED}{Fore.WHITE}{Style.DIM}Comentários:{Style.RESET_ALL}         {self.movie_comments}\n")
+            movie_file.write(f"{Back.RED}{Fore.WHITE}{Style.DIM}#{self.movie_id}\n")
 
     @classmethod
     def get_movie(cls) -> "Movie":
@@ -217,8 +214,8 @@ class Movie:
         movie_tags = []
         while True:
             print("Adicione os gêneros do filme, digite o número do gênero desejado no terminal:")
-            for key, value in switch_tag.items():
-                print(f"{key} - {value}")
+            for key, tag in switch_tag.items():
+                print(f"{key} - {tag}")
             print("0 - Sair")
 
             movie_tag = input("Escolha o número do gênero: ")
@@ -259,8 +256,8 @@ def rating_console():
         option = input("Digite o número da opção desejada: ")
 
         if option == "1":
-            print("Esse é nosso catálogo")
-            # Listar filmes
+            print("\nCatálogo")
+
             movie_files = os.listdir("movies")
             if not movie_files:
                 print("Nenhum filme cadastrado ainda.")
@@ -269,15 +266,18 @@ def rating_console():
                     with open(f"movies/{movie_file}", "r") as file:
                         print(file.read())
         elif option == "2":
-            print("Adicione o filme: ")
+            print("\nAdicione um Filme: ")
             new_movie = Movie.get_movie()
-            new_movie.save_to_file()
+            new_movie.save_info()
             print(f"Filme '{new_movie.movie_name}' adicionado ao catálogo.")
+        elif option == "3":
+            print("\nAvalie o filme: ")
+            
+
         elif option == "5":
-            print("Saindo...")
+            print("\nSaindo...")
             break
 
-# Função principal para login e registro:
 def main():
     while True:
         print("Bem-vindo ao Algoritmo avaliador_cinema.py, caso não tenha uma conta ainda, registre-se e se torne um Avaliador\nEscolha:\n1 - Registrar-se\n2 - Já tenho uma conta\n3 - Sair")
@@ -285,14 +285,14 @@ def main():
 
         if option == "1":
             new_user = User.get_user()
-            new_user.save_to_file()
+            new_user.save_info()
             print("\nCadastro concluído com sucesso.")
             rating_console()
         elif option == "2":
             login = input("Digite seu login: @")
             password = getpass.getpass("Digite sua senha: ")
 
-            user = User.load_from_file(login)
+            user = User.load_info(login)
             if user and user.user_password == password:
                 print("\nLogin bem-sucedido!")
                 print(user)
