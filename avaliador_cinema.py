@@ -147,7 +147,7 @@ class Movie:
             else:
                 print("Nota Inválida! Utilize apenas números de 0.1 à 10.")
 
-        return cls(movie_name, movie_director, movie_rating)
+        return cls("", movie_name, movie_director, "", movie_rating, "")
 
     def generate_movie_id(self, LENGHT = 10) -> str:
         characters = string.ascii_letters + string.digits + string.punctuation
@@ -161,7 +161,7 @@ class Movie:
         return self.movie_director.istitle()
 
     def validate_movie_rating(self):
-        return self.movie_rating > 0 and self.movie_rating <= 0
+        return 0.1 <= self.movie_rating <= 10
 
     def validate_movie_comments(self):
         return len(self.movie_comments) <= 500
